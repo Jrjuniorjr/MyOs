@@ -59,6 +59,8 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t *terminal_buffer;
 
+const char *user = "junior@junior:";
+
 void terminal_initialize(void)
 {
 	terminal_row = 0;
@@ -88,46 +90,76 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 
 void terminal_scrolling()
 {
-		for (size_t x = 0; x < VGA_WIDTH; x++)
+	bool trocarCor = true;
+	if (terminal_row >= VGA_HEIGHT - 1)
+	{
+		for (size_t y = 0; y < VGA_HEIGHT - 1; y++)
 		{
-			const size_t index = 0 * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(terminal_buffer[1 * VGA_WIDTH + x], terminal_color);
+			terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+			for (size_t x = 0; x < VGA_WIDTH; x++)
+			{
+				if (trocarCor && x > strlen(user))
+				{
+					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+					trocarCor = false;
+				}
+				const size_t index = y * VGA_WIDTH + x;
+				terminal_buffer[index] = vga_entry(terminal_buffer[(y + 1) * VGA_WIDTH + x], terminal_color);
+			}
+			trocarCor = true;
 		}
-
-		for (size_t x = 0; x < VGA_WIDTH; x++)
-		{
-			const size_t index = 1 * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(terminal_buffer[2 * VGA_WIDTH + x], terminal_color);
-		}
-
+	}
 }
+
+void terminal_row_checagem()
+{
+	if (terminal_row < VGA_HEIGHT - 1)
+	{
+		terminal_row++;
+	}
+	else
+	{
+		terminal_scrolling();
+	}
+}
+
 void terminal_putchar(char c)
 {
 	if (c == '\n')
 	{
 		terminal_column = 0;
-		terminal_row++;
+		terminal_row_checagem();
+		terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+		for (size_t i = 0; i < strlen(user); i++)
+		{
+			terminal_putchar(user[i]);
+		}
+		terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
 	}
 
 	else
 	{
-
 		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
 		if (++terminal_column == VGA_WIDTH)
 		{
 			terminal_column = 0;
-		}
-		if (terminal_row >= 2)
-		{
-			terminal_scrolling();
+			terminal_row_checagem();
 		}
 	}
 }
 
 void terminal_write(const char *data, size_t size)
 {
+	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+	for (size_t i = 0; i < strlen(user); i++)
+	{
+		terminal_putchar(user[i]);
+	}
+	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
 	for (size_t i = 0; i < size; i++)
+	{
 		terminal_putchar(data[i]);
+	}
 }
 
 void terminal_writestring(const char *data)
@@ -141,5 +173,6 @@ void kernel_main(void)
 	terminal_initialize();
 
 	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!\nIt's my first kernel.\n123\nabb");
+	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n12312");
+	//terminal_scrolling();
 }
