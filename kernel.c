@@ -59,7 +59,7 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t *terminal_buffer;
 
-const char *user = "junior@junior:";
+const char *user = "junior@junior: ";
 
 void terminal_initialize(void)
 {
@@ -93,20 +93,38 @@ void terminal_scrolling()
 	bool trocarCor = true;
 	if (terminal_row >= VGA_HEIGHT - 1)
 	{
-		for (size_t y = 0; y < VGA_HEIGHT - 1; y++)
+		for (size_t y = 0; y < VGA_HEIGHT; y++)
 		{
-			terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
-			for (size_t x = 0; x < VGA_WIDTH; x++)
+			if (y == VGA_HEIGHT - 1)
 			{
-				if (trocarCor && x > strlen(user))
+				terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+				for (size_t x = 0; x < VGA_WIDTH; x++)
 				{
-					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-					trocarCor = false;
+					if (trocarCor && x > strlen(user) - 1)
+					{
+						terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+						trocarCor = false;
+					}
+					const size_t index = y * VGA_WIDTH + x;
+					terminal_buffer[index] = vga_entry(terminal_buffer[(y + 1) * VGA_WIDTH + x], terminal_color);
 				}
-				const size_t index = y * VGA_WIDTH + x;
-				terminal_buffer[index] = vga_entry(terminal_buffer[(y + 1) * VGA_WIDTH + x], terminal_color);
+				trocarCor = true;
 			}
-			trocarCor = true;
+			else
+			{
+				terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+				for (size_t x = 0; x < VGA_WIDTH; x++)
+				{
+					if (trocarCor && x > strlen(user) - 1)
+					{
+						terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+						trocarCor = false;
+					}
+					const size_t index = y * VGA_WIDTH + x;
+					terminal_buffer[index] = vga_entry(terminal_buffer[(y + 1) * VGA_WIDTH + x], terminal_color);
+				}
+				trocarCor = true;
+			}
 		}
 	}
 }
@@ -173,6 +191,6 @@ void kernel_main(void)
 	terminal_initialize();
 
 	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n12312");
+	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\nMY FIRTS KERNEL IMPLEMENTING!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n12312\nabb");
 	//terminal_scrolling();
 }
