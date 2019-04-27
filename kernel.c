@@ -98,22 +98,25 @@ void terminal_limpar_linha(int linha)
 	}
 }
 
-/*bool comparar_nome_user_cor_verde(char str1[]){
-	size_t tamanho_nome_user = strlen(nome_user);
-	char str_nome_user[tamanho_nome_user] = "junior@junior: ";
-	for(size_t x = 0; x < tamanho_nome_user; x++){
-		if(str_nome_user[x] != str1[x]){
+bool comparar_nome_user_cor_verde(char str1[])
+{
+	const size_t tamanho_nome_user = strlen(nome_user);
+	for (size_t x = 0; x < tamanho_nome_user; x++)
+	{
+		if (nome_user[x] != str1[x])
+		{
 			return false;
 		}
 	}
 	return true;
 }
-*/
+
 void terminal_scrolling()
 {
 
 	char string_buffer_auxiliar[VGA_WIDTH];
 	bool trocar_cor = true;
+	const size_t tamanho_nome_user = strlen(nome_user);
 
 	if (terminal_row == VGA_HEIGHT - 1)
 	{
@@ -126,25 +129,23 @@ void terminal_scrolling()
 			}
 
 			terminal_limpar_linha(y);
-
-			terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+			
 			for (size_t x = 0; x < VGA_WIDTH; x++)
 			{
-				/*
-				TENTATIVA DE COMPARAR A STRING DO NOME COM A STRING LIDA
 
-				if(comparar_nome_user_cor_verde && x <= tamanho_nome_user){
-					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);	
-				} 
-				else{
-					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-				}*/
-
-				//Quando tiver strcmp alterar aki e comparar
-				if (trocar_cor && x > strlen(nome_user) - 1)
+				if (x < tamanho_nome_user)
 				{
+					if (comparar_nome_user_cor_verde(string_buffer_auxiliar) && trocar_cor)
+					{
+						terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+						trocar_cor = false;
+					}
+				}
+				
+				else
+				{
+
 					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-					trocar_cor = false;
 				}
 
 				const size_t index = y * VGA_WIDTH + x;
@@ -218,6 +219,6 @@ void kernel_main(void)
 	terminal_initialize();
 
 	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\nMY FIRTS KERNEL IMPLEMENTING\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nabbHello, kernel World!.It's my first kernel.MY FIRTS KERNEL IMPLEMENTINGHello, kernel World!.It's my first kernel.MY FIRTS KERNEL IMPLEMENTINGHello, kernel World!.It's my first kernel.MY FIRTS KERNEL IMPLEMENTING");
+	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\nMY FIRTS KERNEL IMPLEMENTING\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nabbHello\n");
 	//terminal_scrolling();
 }
