@@ -59,7 +59,7 @@ size_t terminal_column;
 uint8_t terminal_color;
 uint16_t *terminal_buffer;
 
-const char *user = "junior@junior: ";
+const char nome_user[] = "junior@junior: ";
 
 void terminal_initialize(void)
 {
@@ -88,50 +88,77 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
+void terminal_limpar_linha(int linha)
+{
+	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+	for (size_t x = 0; x < VGA_WIDTH; x++)
+	{
+		const size_t index = linha * VGA_WIDTH + x;
+		terminal_buffer[index] = vga_entry(' ', terminal_color);
+	}
+}
+
+/*bool comparar_nome_user_cor_verde(char str1[]){
+	size_t tamanho_nome_user = strlen(nome_user);
+	char str_nome_user[tamanho_nome_user] = "junior@junior: ";
+	for(size_t x = 0; x < tamanho_nome_user; x++){
+		if(str_nome_user[x] != str1[x]){
+			return false;
+		}
+	}
+	return true;
+}
+*/
 void terminal_scrolling()
 {
-	bool trocarCor = true;
-	if (terminal_row >= VGA_HEIGHT - 1)
+
+	char string_buffer_auxiliar[VGA_WIDTH];
+	bool trocar_cor = true;
+
+	if (terminal_row == VGA_HEIGHT - 1)
 	{
 		for (size_t y = 0; y < VGA_HEIGHT; y++)
 		{
-			if (y == VGA_HEIGHT - 1)
+			for (size_t x = 0; x < VGA_WIDTH; x++)
 			{
-				terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
-				for (size_t x = 0; x < VGA_WIDTH; x++)
-				{
-					if (trocarCor && x > strlen(user) - 1)
-					{
-						terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-						trocarCor = false;
-					}
-					const size_t index = y * VGA_WIDTH + x;
-					terminal_buffer[index] = vga_entry(terminal_buffer[(y + 1) * VGA_WIDTH + x], terminal_color);
-				}
-				trocarCor = true;
+				const size_t index = (y + 1) * VGA_WIDTH + x;
+				string_buffer_auxiliar[x] = terminal_buffer[index];
 			}
-			else
+
+			terminal_limpar_linha(y);
+
+			terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+			for (size_t x = 0; x < VGA_WIDTH; x++)
 			{
-				terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
-				for (size_t x = 0; x < VGA_WIDTH; x++)
+				/*
+				TENTATIVA DE COMPARAR A STRING DO NOME COM A STRING LIDA
+
+				if(comparar_nome_user_cor_verde && x <= tamanho_nome_user){
+					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);	
+				} 
+				else{
+					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+				}*/
+
+				//Quando tiver strcmp alterar aki e comparar
+				if (trocar_cor && x > strlen(nome_user) - 1)
 				{
-					if (trocarCor && x > strlen(user) - 1)
-					{
-						terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-						trocarCor = false;
-					}
-					const size_t index = y * VGA_WIDTH + x;
-					terminal_buffer[index] = vga_entry(terminal_buffer[(y + 1) * VGA_WIDTH + x], terminal_color);
+					terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+					trocar_cor = false;
 				}
-				trocarCor = true;
+
+				const size_t index = y * VGA_WIDTH + x;
+				terminal_buffer[index] = vga_entry(string_buffer_auxiliar[x], terminal_color);
 			}
+
+			trocar_cor = true;
 		}
 	}
 }
 
 void terminal_row_checagem()
 {
-	if (terminal_row < VGA_HEIGHT - 1)
+	if (terminal_row != VGA_HEIGHT - 1)
 	{
 		terminal_row++;
 	}
@@ -148,9 +175,9 @@ void terminal_putchar(char c)
 		terminal_column = 0;
 		terminal_row_checagem();
 		terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
-		for (size_t i = 0; i < strlen(user); i++)
+		for (size_t i = 0; i < strlen(nome_user); i++)
 		{
-			terminal_putchar(user[i]);
+			terminal_putchar(nome_user[i]);
 		}
 		terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
 	}
@@ -169,9 +196,9 @@ void terminal_putchar(char c)
 void terminal_write(const char *data, size_t size)
 {
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
-	for (size_t i = 0; i < strlen(user); i++)
+	for (size_t i = 0; i < strlen(nome_user); i++)
 	{
-		terminal_putchar(user[i]);
+		terminal_putchar(nome_user[i]);
 	}
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
 	for (size_t i = 0; i < size; i++)
@@ -191,6 +218,6 @@ void kernel_main(void)
 	terminal_initialize();
 
 	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\nMY FIRTS KERNEL IMPLEMENTING!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n12312\nabb");
+	terminal_writestring("Hello, kernel World!.\nIt's my first kernel.\nMY FIRTS KERNEL IMPLEMENTING\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nabbHello, kernel World!.It's my first kernel.MY FIRTS KERNEL IMPLEMENTINGHello, kernel World!.It's my first kernel.MY FIRTS KERNEL IMPLEMENTINGHello, kernel World!.It's my first kernel.MY FIRTS KERNEL IMPLEMENTING");
 	//terminal_scrolling();
 }
